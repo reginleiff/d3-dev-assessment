@@ -45,3 +45,6 @@ Given the following assumptions:
 - I assume we are using machines that are relevant in this day and age, and we are able to make the tradeoff of space for a comfortable and intuitive schema design.
 
 I choose **V1** as the schema.
+
+## Miscellaneous Choices
+- **VARCHAR(320) for email attribute** - The standard dictates the following limitations: 64 characters for the "local part" (username), 1 character for the @ symbol, 255 characters for the domain name.[<sup>1</sup>](https://dba.stackexchange.com/questions/37014/in-what-data-type-should-i-store-an-email-address-in-database#:~:text=VARCHAR%20is%20the%20best%20data,space%20as%20compared%20to%20VARCHAR.)
