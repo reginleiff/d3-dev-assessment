@@ -4,7 +4,7 @@
 ![v1](../docs/assets/v1.png)
 
 **Advantages:**
-- **Intuitive Design** - Out of the many possible schema choices, this design is intuitive and easy to understand as it reflects how an equivalent physical record would document the information. This is a valuable principle to follow in projects that will be maintained by many developers.
+- **Intuitive Design** - Out of the many possible schema choices, this design is intuitive and easy to understand as it reflects how an equivalent physical record would document the information. Class structure is clearly maintained and is the sole principle behind this design and will be a valuable one to abide by in projects that will be maintained by many developers.
 
 - **Easily Extendable** - As the student and teacher information are abstracted into their own tables, adding any additional attributes to the student or teacher class will not require the modification of an unrelated table. For example, if we need to specify the validity of the registration, we can easily and intuitively add an attribute the registration table to indicate that. The back-end logic will then only need to account for the inclusion of the new information. In a system that is undergoing a lot of changes in an iterative development cycle, this is worth considering.
 
@@ -26,9 +26,22 @@
 
 - **Extensions May Not Be Intuitive** - Unlike V1, the addition of more complex features in future may prove to be difficult as all information is encapsulated into a single table. More descriptive names may be required to distinguish fields between the student and teacher. For example, we know that `is_suspended` only applies to student for now, but if the teachers are also susceptible to being suspended in future, then `is_student_suspended` and `is_teacher_suspended` may be most straightforward way to accomodate such a change. In all likelihood, most extensions of this schema design are not recommended. 
 
+### V3
+![v3](../docs/assets/v3.png)
+
+**Advantages:**
+- **Optimised Results** - V3 serves as the middle ground between V1 and V2. We compromise between simplicity (measured by the number of tables) and intuitiveness (measured by maintaining of distinct class structure) to achieve an in-between solution. This is most optimal if the newer features to be added do not demand a clear distinction between the student and teacher classes, as it treats the two classes as a single one for some simplicity. In return, we save some memory usage on during database table reads (especially for )
+
+- **Still open to modification** - Unlike V2, V3 is very much open to modification with the exception that there is a good reason to group the teachers and students together as users. For example, if it is very likely that they should be seen as users (i.e. any student can become a teacher and any teacher can become a student like in an MOOC platform), then there is good justification to keep this design and extend upon. 
+
+**Disadvantages:**
+- **Unique Case Use** - Despite being a lean design, it hinges upon a lot of assumptions that should be clarified before use. It's openness to modification further depends on those assumptions which makes this design usable only in specific use cases. 
+
+
 ### Verdict
 Given the following assumptions:
-- As stated, we may require to extend the APIs and design in future. Having a more flexible design is necessary to accomodate this.
+- As stated in the task description, we may require to extend the APIs and design in future. Having a more flexible design is necessary to accomodate this.
+- I assume that teachers are strictly teachers and students are strictly students like in a school setting (i.e. there is no student that is a teacher). 
 - I assume we are using machines that are relevant in this day and age, and we are able to make the tradeoff of space for a comfortable and intuitive schema design.
 
 I choose **V1** as the schema.
