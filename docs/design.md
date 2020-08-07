@@ -27,7 +27,7 @@
 - **Extensions May Not Be Intuitive** - Unlike V1, the addition of more complex features in future may prove to be difficult as all information is encapsulated into a single table. More descriptive names may be required to distinguish fields between the student and teacher. For example, we know that `is_suspended` only applies to student for now, but if the teachers are also susceptible to being suspended in future, then `is_student_suspended` and `is_teacher_suspended` may be most straightforward way to accomodate such a change. In all likelihood, most extensions of this schema design are not recommended. 
 
 ### Verdict
-Given the following assumptions and explanation:
+Given the following assumptions:
 - As stated, we may require to extend the APIs and design in future. Having a more flexible design is necessary to accomodate this.
 - I assume we are using machines that are relevant in this day and age, and we are able to make the tradeoff of space for a comfortable and intuitive schema design.
 
