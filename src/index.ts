@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import Database from './db';
 import { DB_HOST, DB_NAME, DB_PASS, DB_USER } from '../config';
 import Constants from './constants';
+import { isValidEmail, areValidEmails, parseTaggedEmails } from './utility';
 
 const app = express();
 
@@ -13,17 +14,6 @@ app.use(bodyParser.json());
 
 const router = express.Router();
 const db = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-const isValidEmail = (email: string) => {
-  const trimmed = email.trim();
-  if (!trimmed || trimmed.length == 0) return false;
-  const lower = trimmed.toLowerCase();
-  const emailRegex = /\b[a-z0-9._%+-]{3,255}@[a-z0-9.-]+.[a-z]{2,}\b/;
-  return emailRegex.test(lower);
-};
-
-const areValidEmails = (emails: string[]) =>
-  emails.reduce((valid, email) => (valid ? isValidEmail(email) : valid), true);
 
 const parseRegisterParams = (req: Request): any[] => {
   const studentEmails: string[] = req?.body?.students;
@@ -40,7 +30,7 @@ const parseRegisterParams = (req: Request): any[] => {
 
 const parseCommonStudentsParams = (req: Request): any[] => {
   // @ts-ignore: Incorrect types provided
-  const query: string[] | string = req?.query?.teacher; // @ts-ignore: 
+  const query: string[] | string = req?.query?.teacher; // @ts-ignore:
   const teacherEmails: string[] = _.concat([], query);
   console.log(teacherEmails);
   if (!teacherEmails || teacherEmails.length == 0)
@@ -52,11 +42,21 @@ const parseCommonStudentsParams = (req: Request): any[] => {
 
 const parseSuspendStudentParams = (req: Request): any[] => {
   const studentEmail = req?.body?.student;
-  if (!studentEmail)
-    throw new Error('Student email not provided');
+  if (!studentEmail) throw new Error('Student email not provided');
   if (!isValidEmail(studentEmail))
     throw new Error('Invalid email format for student');
   return [studentEmail];
+};
+
+const parseRetrieveForNotificationParams = (req: Request): any[] => {
+  const teacherEmail: string = req?.body?.teacher;
+  const notification: string = req?.body?.notification;
+  if (!teacherEmail) throw new Error('Teacher email not provided');
+  if (!isValidEmail(teacherEmail))
+    throw new Error('Invalid email format for teacher');
+
+  const additionEmails = parseTaggedEmails(notification);
+  return [teacherEmail, additionEmails];
 };
 
 router.post('/register', async function (req: Request, res: Response) {
@@ -119,19 +119,31 @@ router.post('/suspend', async function (req, res) {
 
   try {
     const student = await db.suspendStudent(studentEmail);
-    if(!student.is_suspended) {
+    if (!student.is_suspended) {
       throw new Error(Constants.ERR_INTERNAL_ERROR);
     }
     res.sendStatus(204);
-  } catch(err) {
+  } catch (err) {
     res.status(500).send(err.message);
   }
 });
 
-router.post('/retrieveForNotifications', function (req, res) {
-  const { body } = req;
-  console.log({ body });
-  res.send(204);
+router.post('/retrieveForNotifications', async function (req, res) {
+  let teacherEmail: string = '';
+  let additionalEmails: string[] = [];
+  try {
+    [teacherEmail, additionalEmails] = parseRetrieveForNotificationParams(req);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+
+  try {
+    const unsuspendedStudentEmails = await db.getNotificationList(teacherEmail);
+    const recipients = _.concat(unsuspendedStudentEmails, additionalEmails);
+    res.status(200).send({ recipients });
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
 });
 
 app.use('/api', router);

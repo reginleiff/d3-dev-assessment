@@ -163,7 +163,15 @@ class Database {
   // ------------- MISCELLANEOUS ---------------
   public async getStudentEmails(teacherEmail: string): Promise<any[]> {
     const queryString =
-      'SELECT DISTINCT s.email AS student_email FROM registration AS r INNER JOIN teacher AS t ON ( r.teacher_id = t.id) INNER JOIN student AS s ON (r.student_id = s.id) WHERE t.email = ?;';
+      'SELECT DISTINCT s.email AS student_email FROM registration AS r INNER JOIN teacher AS t ON (r.teacher_id = t.id) INNER JOIN student AS s ON (r.student_id = s.id) WHERE t.email = ?;';
+    const [result] = await this.query(queryString, [teacherEmail]);
+    const students = result.map(({ student_email }) => student_email);
+    return students;
+  }
+
+  public async getNotificationList(teacherEmail: string): Promise<any[]> {
+    const queryString = 
+      'SELECT DISTINCT s.email AS student_email FROM registration AS r INNER JOIN teacher AS t ON (r.teacher_id = t.id) INNER JOIN student AS s ON (r.student_id = s.id) WHERE t.email = ? AND s.is_suspended = false;';
     const [result] = await this.query(queryString, [teacherEmail]);
     const students = result.map(({ student_email }) => student_email);
     return students;
