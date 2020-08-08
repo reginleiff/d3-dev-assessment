@@ -8,7 +8,6 @@ describe('Database - Registration', () => {
   const validEmail2 = 'defgh@gmail.com';
 
   beforeAll(() => (db = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME)));
-
   afterAll(() => db.close());
 
   describe('Add Registration', () => {

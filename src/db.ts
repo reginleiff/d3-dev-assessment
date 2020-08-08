@@ -149,6 +149,15 @@ class Database {
     return count >= 1;
   }
 
+  // ------------- MISCELLANEOUS ---------------
+  public async getStudentEmails(teacherEmail: string): Promise<any[]> {
+    const queryString =
+      'SELECT DISTINCT s.email AS student_email FROM registration AS r INNER JOIN teacher AS t ON ( r.teacher_id = t.id) INNER JOIN student AS s ON (r.student_id = s.id) WHERE t.email = ?;';
+    const [result] = await this.query(queryString, [teacherEmail]);
+    const students = result.map(({ student_email }) => student_email);
+    return students;
+  }
+
   public async reset(): Promise<boolean> {
     const [result1] = await this.query('DELETE FROM `registration`;', []);
     const [result2] = await this.query('DELETE FROM `teacher`;', []);
