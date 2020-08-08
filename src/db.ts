@@ -102,6 +102,17 @@ class Database {
     return count >= 1;
   }
 
+  public async suspendStudent(email: string): Promise<any> {
+    const exists = await this.doesStudentExist(email);
+    if(!exists) throw new Error(Constants.ERR_STUDENT_DOES_NOT_EXIST);
+
+    const queryString = 'UPDATE `student` SET `is_suspended` = true WHERE `email` = ?;';
+    const [result] = await this.query(queryString, [email]);
+    const { affectedRows } = result;
+    if(affectedRows != 1) throw new Error(Constants.ERR_INTERNAL_ERROR);
+    return this.getStudent(email);
+  }
+
   // ------------- REGISTRATION ---------------
   public async getRegistration(
     studentID: number,
