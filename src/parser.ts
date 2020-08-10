@@ -1,7 +1,7 @@
 /**
  * Parsers are used to parse and validate input parameters to the request through params, query or body prior to
  * continuing the chain of execution with the respective handler.
- * @param req request object
+ * @param req request from request handler
  */
 
 import _ from 'lodash';
