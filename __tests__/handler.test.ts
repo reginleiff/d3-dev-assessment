@@ -16,7 +16,7 @@ describe(SUITE_NAME, () => {
   let db: Database;
   let res: MockResponse<any>;
 
-  beforeAll(() => (db = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME)));
+  beforeAll(() => (db = new Database(DB_HOST, DB_USER, DB_NAME, DB_PASS)));
   afterAll(() => db.close());
 
   describe('Register Student', () => {

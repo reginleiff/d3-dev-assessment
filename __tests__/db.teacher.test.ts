@@ -7,7 +7,7 @@ describe('Database - Teacher', () => {
   const validEmail1 = 'abc@gmail.com';
   const validEmail2 = 'defgh@gmail.com';
 
-  beforeAll(() => (db = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME)));
+  beforeAll(() => (db = new Database(DB_HOST, DB_USER, DB_NAME, DB_PASS)));
 
   afterAll(() => db.close());
 

@@ -8,7 +8,7 @@ describe('Database - Miscellaneous', () => {
   const validEmail2 = 'defgh@gmail.com';
   const validEmail3 = 'ijkl_mnop@gmail.com';
 
-  beforeAll(() => (db = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME)));
+  beforeAll(() => (db = new Database(DB_HOST, DB_USER, DB_NAME, DB_PASS)));
   afterAll(() => db.close());
 
   describe('Get Student Emails', () => {
