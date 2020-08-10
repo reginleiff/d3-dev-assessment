@@ -5,11 +5,12 @@ import Database from './db';
 import loadRoutes from './routes';
 import { DB_HOST, DB_NAME, DB_PASS, DB_USER, PORT } from '../config';
 
-function main() {
+async function main() {
   try {
     const app = express();
     const router: Router = express.Router();
-    const db: Database = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    const db: Database = new Database(DB_HOST, DB_USER, DB_NAME, DB_PASS);
+    await db.verifyConnection();
     const routes = loadRoutes(router, db);
 
     // Support parsing of application/json type post data
@@ -21,8 +22,12 @@ function main() {
   }
 }
 
-try {
-  main();
-} catch (err) {
+(async () => {
+  try {
+    await main();
+  } catch (err) {
+    throw err;
+  }
+})().catch((err) => {
   console.error(err);
-}
+});
