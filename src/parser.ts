@@ -24,7 +24,7 @@ export const parseRegisterParams = (req: Request): any[] => {
 export const parseCommonStudentsParams = (req: Request): any[] => {
   // @ts-ignore: Incorrect types provided
   const query: string[] | string = req?.query?.teacher; // @ts-ignore:
-  const teacherEmails: string[] = _.concat([], query);
+  const teacherEmails: string[] = _.isUndefined(query) ? [] : _.concat([], query);
   if (_.isUndefined(teacherEmails) || teacherEmails.length == 0)
     throw new Error(Constants.ERR_TEACHER_EMAILS_NOT_PROVDED);
   if (!areValidEmails(teacherEmails)) throw new Error(Constants.ERR_TEACHER_EMAILS_INVALID);

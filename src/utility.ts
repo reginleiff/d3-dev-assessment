@@ -1,9 +1,12 @@
+import _ from 'lodash';
+
 /**
  * isValidEmail validates an email string.
  * {@link https://www.regular-expressions.info/email.html}
  * @param email to be validated
  */
 export const isValidEmail = (email: string) => {
+  if (!_.isString(email)) return false;
   const trimmed = email.trim();
   if (!trimmed || trimmed.length == 0) return false;
   const lower = trimmed.toLowerCase();

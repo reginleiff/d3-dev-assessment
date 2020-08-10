@@ -1,5 +1,5 @@
 import { createRequest } from 'node-mocks-http';
-import { parseRegisterParams } from '../src/parser';
+import { parseRegisterParams, parseCommonStudentsParams } from '../src/parser';
 import Constants from '../src/constants';
 
 const SUITE_NAME = 'Handlers';
@@ -82,7 +82,53 @@ describe(SUITE_NAME, () => {
     });
   });
 
-  describe('Get Students', () => {});
+  describe('Get Common Students', () => {
+    test('When not provided teacher param, should throw teacher email not provided error', () => {
+      req = createRequest({});
+      expect(() => parseCommonStudentsParams(req)).toThrow(new Error(Constants.ERR_TEACHER_EMAILS_NOT_PROVDED));
+    });
+
+    test('When provided invalid teacher param, should throw teacher email invalid error', () => {
+      req = createRequest({
+        query: {
+          teacher: 'a',
+        },
+      });
+      expect(() => parseCommonStudentsParams(req)).toThrow(new Error(Constants.ERR_TEACHER_EMAILS_INVALID));
+    });
+
+    test('When provided single invalid teacher param, should throw teacher email invalid error', () => {
+      req = createRequest({
+        query: {
+          teacher: ['teacherken@gmail.com', 'a'],
+        },
+      });
+      expect(() => parseCommonStudentsParams(req)).toThrow(new Error(Constants.ERR_TEACHER_EMAILS_INVALID));
+    });
+
+    test('When provided single teacher param, should successfully validate and return args', () => {
+      req = createRequest({
+        query: {
+          teacher: 'teacherken@gmail.com',
+        },
+      });
+      const [teacherEmails] = parseCommonStudentsParams(req);
+      expect(teacherEmails.length).toBe(1);
+      expect(teacherEmails).toContain('teacherken@gmail.com');
+    });
+
+    test('When provided multiple teacher param, should successfully validate and return args', () => {
+      req = createRequest({
+        query: {
+          teacher: ['teacherken@gmail.com', 'teacherben@gmail.com'],
+        },
+      });
+      const [teacherEmails] = parseCommonStudentsParams(req);
+      expect(teacherEmails.length).toBe(2);
+      expect(teacherEmails).toContain('teacherken@gmail.com');
+      expect(teacherEmails).toContain('teacherben@gmail.com');
+    });
+  });
 
   describe('Suspend Student', () => {});
 
