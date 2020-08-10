@@ -41,10 +41,12 @@
 ### Verdict
 Given the following assumptions:
 - As stated in the task description, we may require to extend the APIs and design in future. Having a more flexible design is necessary to accomodate this.
-- I assume that teachers are strictly teachers and students are strictly students like in a school setting (i.e. there is no student that is a teacher). 
+- I assume that teachers are strictly teachers and students are strictly students like in a school setting (i.e. there is no student that is a teacher). The final schema choice will still accomodate the use case but from an instance perspective, it is not the best design. 
 - I assume we are using machines that are relevant in this day and age, and we are able to make the tradeoff of space for a comfortable and intuitive schema design.
 
 I choose **V1** as the schema.
 
-## Miscellaneous Choices
+## Other Choices
 - **VARCHAR(320) for email attribute** - The standard dictates the following limitations: 64 characters for the "local part" (username), 1 character for the @ symbol, 255 characters for the domain name.[<sup>1</sup>](https://dba.stackexchange.com/questions/37014/in-what-data-type-should-i-store-an-email-address-in-database#:~:text=VARCHAR%20is%20the%20best%20data,space%20as%20compared%20to%20VARCHAR.)
+- **BIGINT for ID attribute** - *INT should be the better choice. The migrations for the tables have been changed to use INT instead of BIGINT.* We shouldn't be expecting more than 4.2 million students and teachers given that we are using the unsigned value, although if that is the case, BIGINT would be the appropriate choice. Moreover, the types used in the server logic have to be tested to account for these extremely large values. Another possible option would be to use string values, but our requirement does not demand that level of sophistication. 
+- **Opting for raw MySQL library over other abstraction layer** - Given the simple class architecture involved (perhaps even unnecessary), using an additional library such as `sequelize` may be a lot of unnecessary additional layers. However, it might have saved some additional effort on testing.
