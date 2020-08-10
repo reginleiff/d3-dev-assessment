@@ -34,16 +34,20 @@ export const parseCommonStudentsParams = (req: Request): any[] => {
 export const parseSuspendStudentParams = (req: Request): any[] => {
   const studentEmail = req?.body?.student;
   if (_.isUndefined(studentEmail)) throw new Error(Constants.ERR_STUDENT_EMAIL_NOT_PROVDED);
+  if (!_.isString(studentEmail)) throw new Error(Constants.ERR_INCORRECT_INPUT_FORMAT);
   if (!isValidEmail(studentEmail)) throw new Error(Constants.ERR_STUDENT_EMAIL_INVALID);
   return [studentEmail];
 };
 
 export const parseRetrieveForNotificationParams = (req: Request): any[] => {
   const teacherEmail: string = req?.body?.teacher;
-  const notification: string = req?.body?.notification;
-  if (_.isUndefined(teacherEmail)) throw new Error(Constants.ERR_TEACHER_EMAILS_NOT_PROVDED);
+  if (_.isUndefined(teacherEmail)) throw new Error(Constants.ERR_TEACHER_EMAIL_NOT_PROVDED);
+  if (!_.isString(teacherEmail)) throw new Error(Constants.ERR_INCORRECT_INPUT_FORMAT);
   if (!isValidEmail(teacherEmail)) throw new Error(Constants.ERR_TEACHER_EMAIL_INVALID);
+
+  const notification: string = req?.body?.notification;
   if (_.isUndefined(notification)) throw new Error(Constants.ERR_NOTIFICATION_NOT_PROVDED);
+  if (!_.isString(notification)) throw new Error(Constants.ERR_INCORRECT_INPUT_FORMAT);
 
   const additionEmails = parseTaggedEmails(notification);
   return [teacherEmail, additionEmails];

@@ -1,5 +1,10 @@
 import { createRequest } from 'node-mocks-http';
-import { parseRegisterParams, parseCommonStudentsParams } from '../src/parser';
+import {
+  parseRegisterParams,
+  parseCommonStudentsParams,
+  parseSuspendStudentParams,
+  parseRetrieveForNotificationParams,
+} from '../src/parser';
 import Constants from '../src/constants';
 
 const SUITE_NAME = 'Handlers';
@@ -113,7 +118,7 @@ describe(SUITE_NAME, () => {
         },
       });
       const [teacherEmails] = parseCommonStudentsParams(req);
-      expect(teacherEmails.length).toBe(1);
+      expect(teacherEmails).toHaveLength(1);
       expect(teacherEmails).toContain('teacherken@gmail.com');
     });
 
@@ -124,13 +129,120 @@ describe(SUITE_NAME, () => {
         },
       });
       const [teacherEmails] = parseCommonStudentsParams(req);
-      expect(teacherEmails.length).toBe(2);
+      expect(teacherEmails).toHaveLength(2);
       expect(teacherEmails).toContain('teacherken@gmail.com');
       expect(teacherEmails).toContain('teacherben@gmail.com');
     });
   });
 
-  describe('Suspend Student', () => {});
+  describe('Suspend Student', () => {
+    test('When not provided student param, should throw student email not provided error', () => {
+      req = createRequest({});
+      expect(() => parseSuspendStudentParams(req)).toThrow(new Error(Constants.ERR_STUDENT_EMAIL_NOT_PROVDED));
+    });
 
-  describe('Retrieve Student Notification List', () => {});
+    test('When provided invalid student param, should throw student email invalid error', () => {
+      req = createRequest({
+        body: {
+          student: 'a',
+        },
+      });
+      expect(() => parseSuspendStudentParams(req)).toThrow(new Error(Constants.ERR_STUDENT_EMAIL_INVALID));
+    });
+
+    test('When provided invalid student param format, should throw invalid input format error', () => {
+      req = createRequest({
+        body: {
+          student: ['studentjon@gmail.com', 'studenthon@gmail.com'],
+        },
+      });
+      expect(() => parseSuspendStudentParams(req)).toThrow(new Error(Constants.ERR_INCORRECT_INPUT_FORMAT));
+    });
+
+    test('When provided single student param, should successfully validate and return args', () => {
+      req = createRequest({
+        body: {
+          student: 'studentjon@gmail.com',
+        },
+      });
+      const [studentEmail] = parseSuspendStudentParams(req);
+      expect(studentEmail).toBe('studentjon@gmail.com');
+    });
+  });
+
+  describe('Retrieve Student Notification List', () => {
+    test('When not provided teacher param, should throw teacher email not provided error', () => {
+      req = createRequest({
+        body: {
+          notification: 'Hello students! @studentagnes@gmail.com @studentmiche@gmail.com',
+        },
+      });
+      expect(() => parseRetrieveForNotificationParams(req)).toThrow(new Error(Constants.ERR_TEACHER_EMAIL_NOT_PROVDED));
+    });
+
+    test('When provided invalid teacher email, should throw teacher email invalid error', () => {
+      req = createRequest({
+        body: {
+          teacher: 'a',
+          notification: 'Hello students! @studentagnes@gmail.com @studentmiche@gmail.com',
+        },
+      });
+      expect(() => parseRetrieveForNotificationParams(req)).toThrow(new Error(Constants.ERR_TEACHER_EMAIL_INVALID));
+    });
+
+    test('When provided incorrect teacher input format, should throw invalid input format error', () => {
+      req = createRequest({
+        body: {
+          teacher: ['teacherken@gmail.com', 'teacherben@gmail.com'],
+          notification: 'Hello students! @studentagnes@gmail.com @studentmiche@gmail.com',
+        },
+      });
+      expect(() => parseRetrieveForNotificationParams(req)).toThrow(new Error(Constants.ERR_INCORRECT_INPUT_FORMAT));
+    });
+
+    test('When not provided any notification parameter, should throw student emails not provided error', () => {
+      req = createRequest({
+        body: {
+          teacher: 'teacherken@gmail.com',
+        },
+      });
+      expect(() => parseRetrieveForNotificationParams(req)).toThrow(new Error(Constants.ERR_NOTIFICATION_NOT_PROVDED));
+    });
+
+    test('When provided invalid notification param, should throw student emails invalid error', () => {
+      req = createRequest({
+        body: {
+          teacher: 'teacherken@gmail.com',
+          notification: ['Hello students! @studentagnes@gmail.com @studentmiche@gmail.com'],
+        },
+      });
+      expect(() => parseRetrieveForNotificationParams(req)).toThrow(new Error(Constants.ERR_INCORRECT_INPUT_FORMAT));
+    });
+
+    test('When provided valid teacher and notification with 2 tags, should successfully validate and parse args', () => {
+      req = createRequest({
+        body: {
+          teacher: 'teacherken@gmail.com',
+          notification: 'Hello students! @studentagnes@gmail.com @studentmiche@gmail.com',
+        },
+      });
+      const [teacherEmail, additionalEmails] = parseRetrieveForNotificationParams(req);
+      expect(teacherEmail).toBe('teacherken@gmail.com');
+      expect(additionalEmails).toHaveLength(2);
+      expect(additionalEmails).toContain('studentagnes@gmail.com');
+      expect(additionalEmails).toContain('studentmiche@gmail.com');
+    });
+
+    test('When provided valid teacher and notification with 0 tags, should successfully validate and parse args', () => {
+      req = createRequest({
+        body: {
+          teacher: 'teacherken@gmail.com',
+          notification: 'Hello students!',
+        },
+      });
+      const [teacherEmail, additionalEmails] = parseRetrieveForNotificationParams(req);
+      expect(teacherEmail).toBe('teacherken@gmail.com');
+      expect(additionalEmails).toHaveLength(0);
+    });
+  });
 });
