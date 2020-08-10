@@ -14,5 +14,6 @@ export default {
   ERR_STUDENT_EMAIL_INVALID: 'Student email provided is invalid',
   ERR_STUDENT_EMAILS_INVALID: 'One or more student emails provided are invalid',
 
+  ERR_INCORRECT_INPUT_FORMAT: 'Incorrect input format',
   ERR_INTERNAL_ERROR: 'Internal Error',
 };

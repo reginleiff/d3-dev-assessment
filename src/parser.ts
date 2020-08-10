@@ -13,9 +13,10 @@ export const parseRegisterParams = (req: Request): any[] => {
   const studentEmails: string[] = req?.body?.students;
   const teacherEmail: string = req?.body?.teacher;
   if (_.isUndefined(teacherEmail)) throw new Error(Constants.ERR_TEACHER_EMAIL_NOT_PROVDED);
+  if (!_.isString(teacherEmail)) throw new Error(Constants.ERR_INCORRECT_INPUT_FORMAT);
   if (!isValidEmail(teacherEmail)) throw new Error(Constants.ERR_TEACHER_EMAIL_INVALID);
-  if (_.isUndefined(studentEmails) || studentEmails.length == 0)
-    throw new Error(Constants.ERR_STUDENT_EMAILS_NOT_PROVDED);
+  if (_.isUndefined(studentEmails)) throw new Error(Constants.ERR_STUDENT_EMAILS_NOT_PROVDED);
+  if (!_.isArray(studentEmails)) throw new Error(Constants.ERR_INCORRECT_INPUT_FORMAT);
   if (!areValidEmails(studentEmails)) throw new Error(Constants.ERR_STUDENT_EMAILS_INVALID);
   return [teacherEmail, studentEmails];
 };
