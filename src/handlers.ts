@@ -1,59 +1,48 @@
 import _ from 'lodash';
-import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
+import { Request, Response } from 'express';
 
 import Database from './db';
-import { DB_HOST, DB_NAME, DB_PASS, DB_USER } from '../config';
 import Constants from './constants';
+import { Parser, ResponseHandler } from './types';
 import {
   parseCommonStudentsParams,
   parseRegisterParams,
   parseRetrieveForNotificationParams,
   parseSuspendStudentParams,
 } from './parsers';
-import { handleRequest, registerStudent } from './handlers';
 
-const app = express();
+export const handleRequest = async (req: Request, res: Response, db: Database, handler: ResponseHandler, parser?: Parser) => {
+  let params: any[] = [];
+  if (parser) {
+    try {
+      params = parser(req);
+    } catch ({ message }) {
+      return res.status(400).send({ message });
+    }
+  }
 
-// support parsing of application/json type post data
-app.use(bodyParser.json());
+  try {
+    await handler(params, res, db);
+    if (!res.headersSent) res.sendStatus(204);
+  } catch ({ message }) {
+    return res.status(500).send({ message });
+  }
+};
 
-const router = express.Router();
-const db = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+export const registerStudent = async (params: any[], res: Response, db: Database) => {
+  const [teacherEmail, studentEmails] = params;
+  const teacher: any = await db.addTeacher(teacherEmail);
+  const studentPromises = studentEmails.map((studentEmail: string) => db.addStudent(studentEmail));
+  const students: any[] = await Promise.all(studentPromises);
+  const registrationPromises = students.map((student) => db.addRegistration(student.id, teacher.id));
+  await Promise.all(registrationPromises);
+  res.sendStatus(204);
+};
 
-router.post('/register', (req: Request, res: Response) =>
-  handleRequest(req, res, db, registerStudent, parseRegisterParams),
-);
+export const registerStudentHandler = async (req: Request, res: Response, db: Database) =>
+  handleRequest(req, res, db, registerStudent, parseRegisterParams);
 
-// router.post('/register', async function (req: Request, res: Response) {
-//   let teacherEmail: string = '',
-//     studentEmails: string[] = [];
-//   try {
-//     [teacherEmail, studentEmails] = parseRegisterParams(req);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(400).send(err.message);
-//     return;
-//   }
-
-//   try {
-//     const teacher: any = await db.addTeacher(teacherEmail);
-//     const studentPromises = studentEmails.map((studentEmail: string) =>
-//       db.addStudent(studentEmail)
-//     );
-//     const students: any[] = await Promise.all(studentPromises);
-//     const registrationPromises = students.map((student) =>
-//       db.addRegistration(student.id, teacher.id)
-//     );
-//     await Promise.all(registrationPromises);
-//   } catch (err) {
-//     res.status(500).send(err.message);
-//   }
-
-//   res.sendStatus(204);
-// });
-
-router.get('/commonstudents', async function (req, res) {
+export const getCommonStudentsHandler = async (req: Request, res: Response, db: Database) => {
   let teacherEmails: string[] = [];
   try {
     [teacherEmails] = parseCommonStudentsParams(req);
@@ -72,9 +61,9 @@ router.get('/commonstudents', async function (req, res) {
   } catch (err) {
     res.status(500).send(err.message);
   }
-});
+};
 
-router.post('/suspend', async function (req, res) {
+export const suspendStudentHandler = async (req: Request, res: Response, db: Database) => {
   let studentEmail: string = '';
   try {
     [studentEmail] = parseSuspendStudentParams(req);
@@ -91,9 +80,9 @@ router.post('/suspend', async function (req, res) {
   } catch (err) {
     res.status(500).send(err.message);
   }
-});
+};
 
-router.post('/retrieveForNotifications', async function (req, res) {
+export const retrieveForNotificationsHandler = async (req: Request, res: Response, db: Database) => {
   let teacherEmail: string = '';
   let additionalEmails: string[] = [];
   try {
@@ -109,8 +98,4 @@ router.post('/retrieveForNotifications', async function (req, res) {
   } catch (err) {
     res.status(500).send(err.message);
   }
-});
-
-app.use('/api', router);
-
-app.listen(3000);
+};

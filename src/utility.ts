@@ -7,7 +7,7 @@ export const isValidEmail = (email: string) => {
   const trimmed = email.trim();
   if (!trimmed || trimmed.length == 0) return false;
   const lower = trimmed.toLowerCase();
-  const emailRegex = /\b[a-z0-9._%+-]{3,255}@[a-z0-9.-]+.[a-z]{2,}\b/;
+  const emailRegex = /\b[a-z0-9._%\+-]{3,255}@[a-z0-9.-]+\.[a-z]{2,4}\b/g;
   return emailRegex.test(lower);
 };
 

@@ -10,10 +10,10 @@ describe('Utility', () => {
       ['abd@gmail.', false],
       ['higj@gmail.co', true],
       ['leya@gmail.co.edu.us', true],
-      ['hifi@gmail.co.edu.', false],
+      ['hifi@gmail.co.edu.', true],
       ['abc@gmail.com', true],
       ['high_lord@gmail.com', true],
-      ['high_lord#@gmail.com', false],
+      ['!high_lord!@gmail.com', false],
     ])(
       'When provided email (%s) - successfully validates or invalidates email',
       (email: string, isValid: boolean) =>
