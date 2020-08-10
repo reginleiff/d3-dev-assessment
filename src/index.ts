@@ -6,14 +6,19 @@ import loadRoutes from './routes';
 import { DB_HOST, DB_NAME, DB_PASS, DB_USER, PORT } from '../config';
 
 function main() {
-  const app = express();
-  const router: Router = express.Router();
-  const db: Database = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+  try {
+    const app = express();
+    const router: Router = express.Router();
+    const db: Database = new Database(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    const routes = loadRoutes(router, db);
 
-  // Support parsing of application/json type post data
-  app.use(bodyParser.json());
-  app.use('/api', loadRoutes(router, db));
-  app.listen(PORT, () => console.log(`Started listening on port ${PORT}`));
+    // Support parsing of application/json type post data
+    app.use(bodyParser.json());
+    app.use('/api', routes);
+    app.listen(PORT, () => console.log(`Started listening on port ${PORT}`));
+  } catch (err) {
+    throw err;
+  }
 }
 
 try {

@@ -85,6 +85,20 @@ describe(SUITE_NAME, () => {
       expect(studentEmails).toContain('studenthon@gmail.com');
       expect(studentEmails).toContain('studentkon@gmail.com');
     });
+
+    test('When provided duplicate students, should successfully filter and return args', () => {
+      req = createRequest({
+        body: {
+          teacher: 'teacherken@gmail.com',
+          students: ['studentjon@gmail.com', 'studentkon@gmail.com', 'studentjon@gmail.com', 'studentkon@gmail.com'],
+        },
+      });
+      const [teacherEmail, studentEmails] = parseRegisterParams(req);
+      expect(teacherEmail).toEqual('teacherken@gmail.com');
+      expect(studentEmails.length).toBe(2);
+      expect(studentEmails).toContain('studentjon@gmail.com');
+      expect(studentEmails).toContain('studentkon@gmail.com');
+    });
   });
 
   describe('Get Common Students', () => {
@@ -243,6 +257,19 @@ describe(SUITE_NAME, () => {
       const [teacherEmail, additionalEmails] = parseRetrieveForNotificationParams(req);
       expect(teacherEmail).toBe('teacherken@gmail.com');
       expect(additionalEmails).toHaveLength(0);
+    });
+
+    test('When provided duplicated tags, should successfully filter and parse args', () => {
+      req = createRequest({
+        body: {
+          teacher: 'teacherken@gmail.com',
+          notification: 'Hello students! @studentagnes@gmail.com @studentagnes@gmail.com',
+        },
+      });
+      const [teacherEmail, additionalEmails] = parseRetrieveForNotificationParams(req);
+      expect(teacherEmail).toBe('teacherken@gmail.com');
+      expect(additionalEmails).toHaveLength(1);
+      expect(additionalEmails).toContain('studentagnes@gmail.com');
     });
   });
 });

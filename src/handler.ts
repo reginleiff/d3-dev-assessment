@@ -1,6 +1,6 @@
 /**
  * Handlers are used to execute logic of handling a request with the required parameters obtained from a parser
- * (if necessary).
+ * (if necessary). Parameters provided are assumed to be valid.
  * @param params array of parameters obtained from parser (args)
  * @param res response writer for writing status codes and data
  * @param db database instance to obtain information
@@ -44,7 +44,7 @@ export const handleRequest = async (
   }
 };
 
-export const registerStudent = async (params: any[], res: Response, db: Database) => {
+export const registerStudents = async (params: any[], res: Response, db: Database) => {
   const [teacherEmail, studentEmails] = params;
   const teacher: any = await db.addTeacher(teacherEmail);
   const studentPromises = studentEmails.map((studentEmail: string) => db.addStudent(studentEmail));
@@ -56,10 +56,12 @@ export const registerStudent = async (params: any[], res: Response, db: Database
 
 export const getCommonStudents = async (params: any[], res: Response, db: Database) => {
   const [teacherEmails]: string[] = params;
-  let studentEmails: string[] = [];
+  let studentEmails: string[] | undefined = undefined;
   for (let teacherEmail of teacherEmails) {
     const respectiveStudentEmails = await db.getStudentEmails(teacherEmail);
-    studentEmails = _.concat(studentEmails, respectiveStudentEmails);
+    studentEmails = _.isUndefined(studentEmails)
+      ? respectiveStudentEmails
+      : _.intersection(studentEmails, respectiveStudentEmails);
   }
   res.status(200).send({ students: _.uniq(studentEmails) });
 };

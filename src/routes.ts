@@ -6,11 +6,14 @@ import {
   parseRetrieveForNotificationParams,
   parseSuspendStudentParams,
 } from './parser';
-import { handleRequest, registerStudent, getCommonStudents, suspendStudent, retrieveForNotifications } from './handler';
+import { handleRequest, registerStudents, getCommonStudents, suspendStudent, retrieveForNotifications } from './handler';
 
 export default (router: Router, db: Database) => {
+  if (!router) throw new Error('Router not initialised');
+  if (!db) throw new Error('Database not initialised');
+
   router.post('/register', (req: Request, res: Response) =>
-    handleRequest(req, res, db, registerStudent, parseRegisterParams),
+    handleRequest(req, res, db, registerStudents, parseRegisterParams),
   );
   router.get('/commonstudents', (req: Request, res: Response) =>
     handleRequest(req, res, db, getCommonStudents, parseCommonStudentsParams),
